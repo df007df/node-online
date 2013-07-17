@@ -1,0 +1,7 @@
+var nMemcached = require( 'memcached' ),
+	memcached = null,
+	crypto = require('crypto'),
+	md5 = null;
+
+memcached = new nMemcached("127.0.0.1:12000" );	
+md5 = crypto.createHash('md5');
