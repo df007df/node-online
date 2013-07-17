@@ -3,7 +3,7 @@ var nMemcached = require( 'memcached' ),
 	crypto = require('crypto'),
 	md5 = null;
 
-memcached = new nMemcached("192.168.0.33:11211" );	
+memcached = new nMemcached("127.0.0.1:11211");
 md5 = crypto.createHash('md5');
 
 

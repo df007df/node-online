@@ -1,8 +1,9 @@
 var fs = require('fs'),
-http = require('http'),
-sio = require('socket.io'),
-parseCookie = require('connect').utils.parseCookie;
-online = require('./online');
+    http = require('http'),
+    sio = require('socket.io'),
+    parseCookie = require('connect').utils.parseCookie;
+    online = require('./online'),
+    socketList = {};
 
 
 var server = http.createServer(function(req, res) {
@@ -26,7 +27,45 @@ io = sio.listen(server);
 // store messages
 var messages = ['wellcome !'];
 // Define a message handler
-io.sockets.on('connection', function (socket) {
+io.of('/online').on('connection', function (socket) {
+
+    socket.on('online', function (userId, fn) {
+
+        addSocketList(socket.id, userId);
+
+        online.getOnlineUser(fn);
+        online.sendNewUser(userId, socket);
+
+    });
+
+    socket.on('offline', function (userId, fn) {
+        //通知删除,并且删除memcached
+
+
+    });
+
+
+    socket.on('disconnect', function() {
+
+        //io.sockets.sockets[sid].json.send({ a: 'b' });
+        var userId = delSocketList(socket.id);
+        socket.broadcast.emit('offline',  userId);
+
+        console.log("#############Connection " + socket.id + " : " + userId + " terminated.");
+    });
+
+
+
+
+    // send messages to new clients
+    messages.forEach(function(msg) {
+        socket.send(msg);
+    })
+});
+
+
+io.of('/message').on('connection', function (socket) {
+
     socket.on('message', function (msg) {
         //console.log('Received: ', msg);
         messages.push(msg);
@@ -36,23 +75,15 @@ io.sockets.on('connection', function (socket) {
         socket.broadcast.emit('message', msg);
     });
 
-
-    socket.on('online', function (userId, fn) {
-
-        console.log('userId', userId);
-
-        //online.addUser(userId);
-
-        online.getOnlineUser(fn);
-
-
-        online.sendNewUser(userId, socket);
-
-    });
-
-
-    // send messages to new clients
-    messages.forEach(function(msg) {
-        socket.send(msg);
-    })
 });
+
+
+function addSocketList(id, userId) {
+    socketList[id] = userId;
+}
+
+function delSocketList(id) {
+    var userId = socketList[id];
+    delete socketList[id];
+    return userId;
+}
