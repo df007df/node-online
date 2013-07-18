@@ -2,8 +2,8 @@ var fs = require('fs'),
     http = require('http'),
     sio = require('socket.io'),
     parseCookie = require('connect').utils.parseCookie;
-    online = require('./online'),
-    socketList = {};
+    online = require('./online');
+
 
 
 var server = http.createServer(function(req, res) {
@@ -31,8 +31,6 @@ io.of('/online').on('connection', function (socket) {
 
     socket.on('online', function (userId, fn) {
 
-        addSocketList(socket.id, userId);
-
         online.getOnlineUser(fn);
         online.sendNewUser(userId, socket);
 
@@ -48,10 +46,10 @@ io.of('/online').on('connection', function (socket) {
     socket.on('disconnect', function() {
 
         //io.sockets.sockets[sid].json.send({ a: 'b' });
-        var userId = delSocketList(socket.id);
-        socket.broadcast.emit('offline',  userId);
+        var data = online.offlineUser(socket.id);
+        socket.broadcast.emit('offline',  data);
 
-        console.log("#############Connection " + socket.id + " : " + userId + " terminated.");
+        console.log("#############Connection " + socket.id + " : " + data.userId + " terminated.");
     });
 
 
@@ -77,13 +75,3 @@ io.of('/message').on('connection', function (socket) {
 
 });
 
-
-function addSocketList(id, userId) {
-    socketList[id] = userId;
-}
-
-function delSocketList(id) {
-    var userId = socketList[id];
-    delete socketList[id];
-    return userId;
-}

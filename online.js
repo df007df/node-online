@@ -1,22 +1,12 @@
 var USER = [],
-	memcached = require('./cache'),
-	phpunserialize = require('php-unserialize');
+    memcached = require('./cache'),
+    phpunserialize = require('php-unserialize'),
+    socketList = {};
 
 
 
-function addUser(userId)
-{
-
-	USER[userId] = userId;
-
-	console.log('Server has started!');
-}
 
 
-function delUser() {
-
-
-}
 
 //get user of online
 function getOnlineUser(fn)
@@ -41,31 +31,81 @@ function getOnlineUser(fn)
 
 //send new user of online
 function sendNewUser(userId, socket) {
-	 var info = {userId: userId, data: null};
-	 //get userinfo form memcached
 
-     var fn = function(result) {
-
-
+    var fn = function(result) {
+        var info = {userId: userId, data: null};
         if (result && result[userId]) {
             info.data = result[userId];
-            console.log('info=>' + userId, info);
-        	socket.broadcast.emit('online',  info);
+            socket.broadcast.emit('online',  info);
+
+            addSocketList(socket.id, info);
         }
+    }
+
+    info = searchSocketList(userId);
+    if (info) {
+        //socket.broadcast.emit('online',  info);
+    } else {
+        getOnlineUser(fn);
+    }
+}
 
 
-     	//get user info form memcached
+function offlineUser(socketId) {
+    //删除用户的所有保存的链接socket
+    var info = delSocketList(socketId);
+
+    console.log('info', info);
+
+    if (info) {
+        delSocketListByUser(info.userId);
+    }
+
+    //清除缓存吧
+    return info;
+}
 
 
-     }
+function searchSocketList(userId) {
 
-	 getOnlineUser(fn);
+    for (var sock in socketList) {
+        if (socketList.hasOwnProperty(sock)) {
+            if (socketList[sock].userId === userId) {
+                return socketList[sock];
+            }
+        }
+    }
+    return null;
+}
 
+function addSocketList(id, info) {
+    socketList[id] = info;
+}
+
+function delSocketList(id) {
+    var info = null;
+    if (socketList[id]) {
+        info = socketList[id];
+        delete socketList[id];
+    }
+
+    return info;
+}
+
+function delSocketListByUser(userId) {
+    var info = null;
+    for (var sock in socketList) {
+        if (socketList.hasOwnProperty(sock)) {
+            if (socketList[sock].userId === userId) {
+                info = delSocketList(sock);
+            }
+        }
+    }
+    return info;
 }
 
 
 
-exports.addUser = addUser;
-exports.delUser = delUser;
 exports.getOnlineUser = getOnlineUser;
 exports.sendNewUser = sendNewUser;
+exports.offlineUser = offlineUser;
