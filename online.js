@@ -2,7 +2,8 @@ var USER = [],
     memcached = require('./cache'),
     phpunserialize = require('php-unserialize'),
     socketList = {},
-    list = [];
+    list = [],
+    onlineList = {};
 
 
 
@@ -11,6 +12,13 @@ function eq(s1, s2) {
 
 }
 
+
+//从 cached 中获取用户信息数据 userId = []
+function getUserInfo(userId, fn) {
+
+
+
+}
 
 //get user of online
 function getOnlineUser(fn)
@@ -30,6 +38,16 @@ function getOnlineUser(fn)
 
 	memcached.get(key, fnn);
 
+}
+
+//判断是否在线 多个链接判断！？
+function isOnline(userId) {
+
+    if (onlineList[userId] && onlineList[userId].length >= 1) {
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -66,14 +84,12 @@ function sendNewUser(userId, socket) {
     }
 
 
-    console.log('socketList===>', socketList);
-    var info = searchSocketList(userId);
+    if (!isOnline(userId)) {
+        var info = getUserInfo(userId);
 
-    if (info) {
         addSocketList(socket.id, info);
-        //socket.broadcast.emit('online',  info);
-    } else {
-        getOnlineUser(fn);
+
+        socket.broadcast.emit('online',  info);
     }
 }
 
