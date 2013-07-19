@@ -46,10 +46,10 @@ io.of('/online').on('connection', function (socket) {
     socket.on('disconnect', function() {
 
         //io.sockets.sockets[sid].json.send({ a: 'b' });
-        var data = online.offlineUser(socket.id);
-        socket.broadcast.emit('offline',  data);
+        //var data = online.offlineUser(socket.id);
+        //socket.broadcast.emit('offline',  data);
 
-        console.log("#############Connection " + socket.id + " : " + data.userId + " terminated.");
+        //console.log("#############Connection " + socket.id + " : " + data.userId + " terminated.");
     });
 
 

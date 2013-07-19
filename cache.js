@@ -3,7 +3,7 @@ var nMemcached = require( 'memcached' ),
 	crypto = require('crypto'),
 	md5 = null;
 
-memcached = new nMemcached("127.0.0.1:11211" );	
+memcached = new nMemcached("127.0.0.1:11211" );
 
 
 function getQueKey(key) {
@@ -37,7 +37,7 @@ function get(key, fn) {
 			} else {
 				fn(false);
 			}
-			
+
 		}
 		//memcached.end();
 
@@ -47,3 +47,4 @@ function get(key, fn) {
 
 exports.set = set;
 exports.get = get;
+exports.getQueKey = getQueKey;
