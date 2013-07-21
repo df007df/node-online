@@ -1,9 +1,10 @@
 var nMemcached = require( 'memcached' ),
 	memcached = null,
 	crypto = require('crypto'),
+	config = require('./config'),
 	md5 = null;
 
-memcached = new nMemcached("127.0.0.1:11211" );
+memcached = new nMemcached(config.MEMCACHED_PATH);
 
 
 function getQueKey(key) {

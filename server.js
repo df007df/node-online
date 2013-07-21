@@ -2,7 +2,8 @@ var fs = require('fs'),
     http = require('http'),
     sio = require('socket.io'),
     parseCookie = require('connect').utils.parseCookie;
-    online = require('./online');
+    online = require('./online'),
+    config = require('./config');
 
 
 
@@ -14,7 +15,7 @@ var server = http.createServer(function(req, res) {
     });
     res.end(fs.readFileSync('./index.html'));
 });
-server.listen(8000, function() {
+server.listen(config.SERVER_PORT, function() {
     console.log('Server listening at http://localhost:8000/');
 });
 // Attach the socket.io server
